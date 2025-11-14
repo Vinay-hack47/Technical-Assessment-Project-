@@ -10,17 +10,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Menu, X } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { setAuthUser } from "@/redux/authSlice";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { user } = useSelector((store) => store.auth)
-  
 
+  const dispatch = useDispatch();
+  
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -38,6 +40,7 @@ const Navbar = () => {
 
       if (res.data?.success) {
         toast.success(res.data.message);
+        dispatch(setAuthUser(""))
         navigate("/login")
       }
 
@@ -46,8 +49,6 @@ const Navbar = () => {
       toast.error(error.response?.data?.message || "Logout failed");
     }
   };
-
-
 
 
   return (
@@ -78,7 +79,7 @@ const Navbar = () => {
             <NavigationMenuList className="flex items-center gap-4">
               <NavigationMenuItem>
                 <Link
-                  to="/uploads"
+                  to="/my-uploads"
                   className="text-sm text-gray-700 hover:text-primary transition-colors"
                 >
                   My Uploads
@@ -154,7 +155,7 @@ const Navbar = () => {
                   <Avatar className="w-8 h-8">
                     <AvatarFallback>CL</AvatarFallback>
                   </Avatar>
-                  <span className="text-sm text-gray-700">{user.name}</span>
+                  <span onClick={()=> navigate("/profile")} className="text-sm text-gray-700">{user.name}</span>
                 </div>
                 <button
                   onClick={handleLogout}

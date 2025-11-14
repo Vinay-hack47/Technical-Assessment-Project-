@@ -5,11 +5,17 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import OCRPage from './pages/OCRPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import MyUploads from './pages/MyUploads'
+import Profile from './pages/Profile'
 
 const appRouter = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: (
+      <ProtectedRoute>
+        <Home />,
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/login',
@@ -18,6 +24,14 @@ const appRouter = createBrowserRouter([
   {
     path: '/register',
     element: <Register />,
+  },
+  {
+    path: '/my-uploads',
+    element: <MyUploads />,
+  },
+  {
+    path: '/profile',
+    element: <Profile />,
   },
   {
     path: '/upload',
