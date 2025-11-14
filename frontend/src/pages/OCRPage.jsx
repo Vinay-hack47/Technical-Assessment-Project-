@@ -62,7 +62,7 @@ const OCRPage = () => {
       const route = isImage ? '/extract-image' : '/extract-pdf';
 
       const res = await axios.post(
-        `http://localhost:3000/api/v1/ocr${route}`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/ocr${route}`,
         form,
         {
           headers: { 'Content-Type': 'multipart/form-data' },
@@ -104,7 +104,7 @@ const OCRPage = () => {
 
     try {
       const res = await axios.post(
-        'http://localhost:3000/api/v1/ocr-analyzer/analyze-text',
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/ocr-analyzer/analyze-text`,
         { text: ocrText, language },
         { headers: { 'Content-Type': 'application/json' }, withCredentials: true }
       );
