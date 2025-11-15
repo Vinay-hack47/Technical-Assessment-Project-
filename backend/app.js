@@ -19,19 +19,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // FIXED: remove trailing slash
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://technical-assessment-project-8fje.vercel.app",
-];
-
-// FIXED: Proper CORS config
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
-
+app.use(cors({
+  origin: "https://technical-assessment-project-8fje.vercel.app",
+  credentials: true
+}));
 app.options("*", cors());
 
 app.use("/api/v1/user", userRouter);
