@@ -21,8 +21,11 @@ app.use(cookieParser());
 // FIXED: remove trailing slash
 app.use(cors({
   origin: "https://technical-assessment-project-8fje.vercel.app",
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 app.options("*", cors());
 
 app.use("/api/v1/user", userRouter);
