@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const corsOptions ={
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173","https://technical-assessment-project-jx7j.vercel.app"],
   credentials: true,
 }
 app.use(cors(corsOptions));
@@ -32,6 +32,4 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/ocr", ocrRoutes);
 app.use('/api/v1/ocr-analyzer', ocrAnalyzeRoutes);
 
-app.listen(PORT, () =>{
-  console.log(`Server is running on port ${PORT}`);
-});
+export default app;
