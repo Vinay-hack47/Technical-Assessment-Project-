@@ -19,7 +19,7 @@ import { setTimeout as delay } from 'timers/promises';
 
 // Helper: call Hugging Face inference endpoint (no Authorization header by default)
 async function callHuggingFaceModel(model, input, options = {}) {
-  const url = `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`;
+  const url = `https://router.huggingface.co/hf-inference/v1/models/${encodeURIComponent(model)}`;
   const body = typeof input === 'string' ? input : input;
   // Build fetch options
   const fetchOpts = {
