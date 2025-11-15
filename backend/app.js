@@ -7,6 +7,7 @@ import path from "path";
 import userRouter from "./router/user.route.js";
 import ocrRoutes from "./router/ocrRoutes.js";
 import ocrAnalyzeRoutes from "./router/ocrAnalyzeRoutes.js";
+import serverless from "serverless-http";
 
 dotenv.config();
 connectDB();
@@ -17,11 +18,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// FIXED: remove trailing slash
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://technical-assessment-project-8fje.vercel.app/",
+  "https://technical-assessment-project-8fje.vercel.app",
 ];
 
+// FIXED: Proper CORS config
 app.use(
   cors({
     origin: allowedOrigins,
@@ -29,10 +32,10 @@ app.use(
   })
 );
 
+app.options("*", cors());
+
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/ocr", ocrRoutes);
 app.use("/api/v1/ocr-analyzer", ocrAnalyzeRoutes);
 
-export default function handler(req, res) {
-  return app(req, res);
-}
+export default serverless(app);
