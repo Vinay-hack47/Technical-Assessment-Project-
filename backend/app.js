@@ -33,4 +33,6 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/ocr", ocrRoutes);
 app.use("/api/v1/ocr-analyzer", ocrAnalyzeRoutes);
 
-export default app;
+export default function handler(req, res) {
+  return app(req, res);
+}
