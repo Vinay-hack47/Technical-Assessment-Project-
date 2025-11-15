@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://technical-assessment-project-8fje.vercel.app",
+  "https://technical-assessment-project-8fje.vercel.app/",
 ];
 
 app.use(
