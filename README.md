@@ -1,5 +1,7 @@
 # 🧠 ContentLab — Social Media Content Analyzer
 
+## Live Demo - https://technical-assessment-project-8fje.vercel.app
+
 > **Intelligent text extraction meets AI-powered content optimization.** Extract text from PDFs and images, analyze sentiment and tone, and get AI-driven suggestions to maximize your social media engagement.
 
 ![Status](https://img.shields.io/badge/status-active-brightgreen) 
