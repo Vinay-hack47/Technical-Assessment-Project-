@@ -1064,14 +1064,3 @@ Essentially: free to use, modify, and distribute. Attribution appreciated but no
 
 ---
 
-## 📞 Support
-
-- **Issues**: Open a GitHub issue with detailed description
-- **Discussions**: Use GitHub Discussions for questions
-- **Email**: (Add your email if desired)
-
----
-
-**Made with ❤️ for creators, by developers.**
-
-*Last Updated: November 2025*
