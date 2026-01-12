@@ -7,6 +7,7 @@ import path from "path";
 import userRouter from "./router/user.route.js";
 import ocrRoutes from "./router/ocrRoutes.js";
 import ocrAnalyzeRoutes from "./router/ocrAnalyzeRoutes.js";
+import promptRefinerRoutes from "./router/promptRefinerRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -44,6 +45,7 @@ app.use(
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/ocr", ocrRoutes);
 app.use("/api/v1/ocr-analyzer", ocrAnalyzeRoutes);
+app.use("/api/v1/prompt-refiner", promptRefinerRoutes);
 
 
 app.listen(PORT, () => {

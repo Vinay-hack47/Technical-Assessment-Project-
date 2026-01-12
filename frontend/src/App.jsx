@@ -7,6 +7,7 @@ import OCRPage from './pages/OCRPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import MyUploads from './pages/MyUploads'
 import Profile from './pages/Profile'
+import PromptRefiner from './pages/PromptRefiner'
 
 const appRouter = createBrowserRouter([
   {
@@ -38,6 +39,14 @@ const appRouter = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <OCRPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/refine-prompt',
+    element: (
+      <ProtectedRoute>
+        <PromptRefiner />
       </ProtectedRoute>
     ),
   },

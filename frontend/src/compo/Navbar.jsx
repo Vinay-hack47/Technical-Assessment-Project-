@@ -93,6 +93,14 @@ const Navbar = () => {
                   New Upload
                 </Link>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link
+                  to="/refine-prompt"
+                  className="text-sm  text-primary hover:underline font-medium "
+                >
+                  Prompt Refiner
+                </Link>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
 
@@ -143,11 +151,18 @@ const Navbar = () => {
                 My Uploads
               </Link>
               <Link
-                to="/uploads/new"
+                to="/upload"
                 className="text-primary text-sm font-medium hover:underline"
                 onClick={() => setMobileOpen(false)}
               >
                 New Upload
+              </Link>
+              <Link
+                to="/refine-prompt"
+                className="text-gray-700 text-sm hover:text-primary transition"
+                onClick={() => setMobileOpen(false)}
+              >
+                Prompt Refiner
               </Link>
 
               <div className="border-t pt-4 mt-4">
