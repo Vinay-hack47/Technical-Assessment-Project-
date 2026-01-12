@@ -1,44 +1,21 @@
 import { setTimeout as delay } from 'timers/promises';
 
-/**
- * ocrAnalysisController.js
- *
- * Uses Hugging Face public inference endpoints (no API key required).
- * Models used:
- *  - Summarization: facebook/mbart-large-50-many-to-many-mmt  (multilingual)
- *  - Sentiment: nlptown/bert-base-multilingual-uncased-sentiment (multilingual, returns star labels)
- *  - Keyphrase extraction: ml6team/keyphrase-extraction-distilbert-inspec
- *  - Suggestions: facebook/blenderbot_small-90M (dialogue/generation)
- *
- * Expects JSON body:
- *  { text: "...", language: "eng" }
- *
- * Returns JSON:
- *  { summary, sentiment, keywords, hashtags, suggestions }
- */
-
-// Helper: call Hugging Face inference endpoint (no Authorization header by default)
 async function callHuggingFaceModel(model, input, options = {}) {
   const url = `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`;
-    // const url = `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`;
   const body = typeof input === 'string' ? input : input;
   // Build fetch options
   const fetchOpts = {
     method: 'POST',
     headers: {
       Accept: 'application/json',
-      // If you later want to use a HF token, set process.env.HF_TOKEN and uncomment below:
-      // ...(process.env.HF_TOKEN ? { Authorization: `Bearer ${process.env.HF_TOKEN}` } : {}),
     },
     body: typeof body === 'string' ? body : JSON.stringify(body),
   };
 
-  // For some models the API expects raw text; for others it expects JSON
-  // If options.contentType specified, set header accordingly
+
   if (options.contentType) {
     fetchOpts.headers['Content-Type'] = options.contentType;
   } else {
-    // default JSON
     fetchOpts.headers['Content-Type'] = 'application/json';
   }
 
@@ -51,7 +28,6 @@ async function callHuggingFaceModel(model, input, options = {}) {
       if (!res.ok) {
         const text = await res.text().catch(() => '');
         const msg = `HF model ${model} request failed: ${res.status} ${res.statusText} ${text}`;
-        // For rate-limited responses, wait a bit and retry
         if (res.status === 429 || res.status === 503) {
           await delay(1000 * (attempt + 1));
           continue;
@@ -62,17 +38,13 @@ async function callHuggingFaceModel(model, input, options = {}) {
       const json = await res.json();
       return json;
     } catch (err) {
-      // If last attempt, throw
       if (attempt === 3) throw err;
-      // small backoff before retry
       await delay(600 * (attempt + 1));
     }
   }
 }
 
-// Map nlptown labels to simple sentiment
 function mapNlptownToSentiment(inferenceOutput) {
-  // nlptown usually returns array like [{label: "5 stars", score: 0.7}, ...]
   try {
     if (!Array.isArray(inferenceOutput)) return 'neutral';
     // find top label
@@ -88,7 +60,6 @@ function mapNlptownToSentiment(inferenceOutput) {
   }
 }
 
-// Normalize keywords returned by keyphrase model (some models return [{score,word}, ...] or ["phrase1","phrase2"])
 function normalizeKeywords(raw) {
   if (!raw) return [];
   if (Array.isArray(raw)) {
@@ -136,7 +107,6 @@ export const analyzeText = async (req, res) => {
     }
 
     // language codes mapping (frontend may send 'eng','hin','spa','fra','por')
-    // For HF models we will use language tags where necessary (mbart expects language tokens like 'en_XX', 'hi_IN', etc).
     const lang = (language || 'eng').toLowerCase();
 
     // map simple ISO to MBART tokens (a minimal mapping for our languages)
@@ -150,30 +120,24 @@ export const analyzeText = async (req, res) => {
     const mbartLang = mbartLangMap[lang] || 'en_XX';
 
     // 1) Summarization (short summary)
-    // facebook/mbart-large-50-many-to-many-mmt supports multilingual summarization but expects special input format.
-    // We'll use the HF inference endpoint with parameters: {"inputs": text, "parameters": {"max_length": 120}}
     let summary = '';
     try {
       const summModel = 'facebook/mbart-large-50-many-to-many-mmt';
       const summPayload = {
         inputs: text,
         parameters: {
-          max_length: 120, // short summary (2-3 sentences)
+          max_length: 120, 
           min_length: 20,
           num_beams: 4,
-          forced_bos_token_id: undefined, // we'll try to set target_lang below if supported
+          forced_bos_token_id: undefined, 
         },
         options: { wait_for_model: true }
       };
-      // Some inference instances accept a top-level "target_lang" param; include it in parameters if accepted.
-      // The public inference API sometimes supports {"task": "summarization", "target_lang": "en_XX"} but it's inconsistent.
-      // We'll include target_lang in parameters (many-to-many supports it).
+      
       summPayload.parameters.target_lang = mbartLang;
 
       const summResp = await callHuggingFaceModel(summModel, summPayload);
-      // summResp may be an array with {summary_text: "..."} or raw text. Try to extract.
       if (Array.isArray(summResp)) {
-        // many models return [{summary_text: "..." }]
         summary = summResp[0]?.summary_text || (typeof summResp[0] === 'string' ? summResp[0] : '');
       } else if (typeof summResp === 'string') {
         summary = summResp;
@@ -182,22 +146,19 @@ export const analyzeText = async (req, res) => {
       } else if (Array.isArray(summResp[0]) && summResp[0].summary_text) {
         summary = summResp[0].summary_text;
       } else {
-        // fallback: take first string field
         summary = JSON.stringify(summResp).slice(0, 300);
       }
       summary = String(summary).trim();
     } catch (err) {
       console.error('Summarization error:', err?.message || err);
-      summary = ''; // continue
+      summary = ''; 
     }
 
     // 2) Sentiment (nlptown)
     let sentiment = 'neutral';
     try {
       const sentModel = 'nlptown/bert-base-multilingual-uncased-sentiment';
-      // model expects raw text in body
       const sentResp = await callHuggingFaceModel(sentModel, text);
-      // typical response: [ { label: '5 stars', score: 0.45 }, ... ]
       sentiment = mapNlptownToSentiment(sentResp);
     } catch (err) {
       console.error('Sentiment error:', err?.message || err);
@@ -208,12 +169,9 @@ export const analyzeText = async (req, res) => {
     let keywords = [];
     try {
       const keyModel = 'ml6team/keyphrase-extraction-distilbert-inspec';
-      // HF expects {"inputs": text}
       const keyResp = await callHuggingFaceModel(keyModel, { inputs: text });
-      // keyResp often returns an array of strings or objects
       keywords = normalizeKeywords(keyResp);
       if (keywords.length === 0 && typeof keyResp === 'string') {
-        // fallback: naive local extraction if HF doesn't return expected shape
         const words = String(text)
           .replace(/[^\p{L}\p{N}\s]/gu, ' ')
           .toLowerCase()
@@ -250,7 +208,6 @@ export const analyzeText = async (req, res) => {
     let suggestions = [];
     try {
       const suggModel = 'facebook/blenderbot_small-90M';
-      // Compose prompt
       const prompt = `You are a helpful assistant that gives short actionable suggestions (2-4 bullets) to improve the given content for social media. Language: ${lang}.
 Content:
 """${text}"""

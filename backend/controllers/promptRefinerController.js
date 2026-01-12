@@ -1,29 +1,9 @@
-// controllers/promptRefinerController.js
-// Multi-Modal Prompt Refinement System
-// Processes text, images, PDFs, DOCX and combines them into structured prompts
-
 import { createWorker } from 'tesseract.js';
 import { createCanvas } from 'canvas';
 import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import mammoth from 'mammoth';
 import { setTimeout as delay } from 'timers/promises';
 
-/**
- * PROMPT REFINEMENT TEMPLATE STRUCTURE
- * 
- * {
- *   intent: string,              // Core purpose/goal of the prompt
- *   requirements: string[],      // Key functional requirements
- *   constraints: string[],        // Technical/business constraints
- *   deliverables: string[],      // Expected outputs
- *   metadata: {
- *     sourceTypes: string[],     // ['text', 'image', 'pdf', 'docx']
- *     confidence: number,        // 0-1 confidence score
- *     extractedText: string,     // Raw extracted text
- *     timestamp: string
- *   }
- * }
- */
 
 // Helper: Extract text from image using OCR
 async function extractTextFromImage(buffer, lang = 'eng') {
@@ -91,7 +71,6 @@ async function extractTextFromDOCX(buffer) {
 
 // Helper: Call Hugging Face model for prompt refinement
 async function callHuggingFaceModel(model, input, options = {}) {
-  // Try router endpoint first, fallback to inference API if needed
   const endpoints = [
     `https://router.huggingface.co/models/${encodeURIComponent(model)}`,
     `https://api-inference.huggingface.co/models/${encodeURIComponent(model)}`
@@ -116,9 +95,8 @@ async function callHuggingFaceModel(model, input, options = {}) {
             await delay(1000 * (attempt + 1));
             continue;
           }
-          // If 410 Gone or other permanent error, try next endpoint
           if (res.status === 410) {
-            break; // Try next endpoint
+            break; 
           }
           const text = await res.text().catch(() => '');
           throw new Error(`HF API error: ${res.status} ${res.statusText} ${text}`);
@@ -130,7 +108,7 @@ async function callHuggingFaceModel(model, input, options = {}) {
           if (endpoints.indexOf(url) === endpoints.length - 1) {
             throw err; // Last endpoint, throw error
           }
-          break; // Try next endpoint
+          break; 
         }
         await delay(600 * (attempt + 1));
       }
@@ -146,7 +124,7 @@ async function refinePromptWithAI(extractedText) {
     // We'll use facebook/bart-large-cnn for summarization and structure extraction
     const model = 'facebook/bart-large-cnn';
     
-    // Create a structured prompt for the AI
+    // Structured prompt for the AI
     const refinementPrompt = `Extract and structure the following content into a clear, actionable prompt. Identify:
 1. Core Intent: What is the main goal or purpose?
 2. Requirements: List key functional requirements (bullet points)
@@ -183,7 +161,6 @@ Format your response as structured sections clearly labeled.`;
     return refinedText.trim();
   } catch (err) {
     console.error('AI refinement error:', err);
-    // Return null to indicate AI failed, will use fallback in main controller
     return null;
   }
 }
@@ -192,7 +169,6 @@ Format your response as structured sections clearly labeled.`;
 function extractStructuredInfo(text) {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
   
-  // Simple heuristics to extract structure
   const intent = lines[0] || 'Purpose not clearly specified';
   const requirements = lines.filter(l => 
     l.toLowerCase().includes('requirement') || 
@@ -351,7 +327,6 @@ export const refinePrompt = async (req, res) => {
         }
       } catch (err) {
         console.error(`Error processing ${originalname}:`, err);
-        // Continue with other files even if one fails
         continue;
       }
 
