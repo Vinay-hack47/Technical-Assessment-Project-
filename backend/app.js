@@ -8,7 +8,6 @@ import userRouter from "./router/user.route.js";
 import ocrRoutes from "./router/ocrRoutes.js";
 import ocrAnalyzeRoutes from "./router/ocrAnalyzeRoutes.js";
 
-
 dotenv.config();
 connectDB();
 
@@ -32,7 +31,6 @@ app.use(
     credentials: true,
   })
 );
-
 
 
 app.use("/api/v1/user", userRouter);
